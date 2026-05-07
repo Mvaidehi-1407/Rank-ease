@@ -32,7 +32,7 @@ export default function CollegeCard({ college }) {
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.9 }}
       transition={{ layout: { duration: 0.4, type: "spring", bounce: 0.2 } }}
-      className="relative w-full h-380px perspective-1000 cursor-pointer group hover:-translate-y-2 transition-transform duration-300"
+      className="relative w-full h-[380px] perspective-1000 cursor-pointer group hover:-translate-y-2 transition-transform duration-300"
       onClick={() => setIsFlipped(!isFlipped)}
       role="button"
       tabIndex={0}
@@ -49,7 +49,7 @@ export default function CollegeCard({ college }) {
         transition={{ type: "spring", stiffness: 260, damping: 20 }}
       >
         {/* Front of Card */}
-        <div className={`absolute w-full h-full backface-hidden glass-panel rounded-2xl overflow-hidden border-t-4px ${getBorderColor()} flex flex-col`}>
+        <div className={`absolute inset-0 w-full h-full backface-hidden glass-panel rounded-2xl overflow-hidden border-t-4 ${getBorderColor()} flex flex-col`}>
           <div className="h-40 w-full relative">
             <img src={imageSrc} alt={collegeName} className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-linear-to-t from-background to-transparent" />
@@ -90,7 +90,7 @@ export default function CollegeCard({ college }) {
 
         {/* Back of Card (Flipped) */}
         <div 
-          className={`absolute w-full h-full backface-hidden glass-panel rounded-2xl border-t-4px ${getBorderColor()} p-6 flex flex-col`}
+          className={`absolute inset-0 w-full h-full backface-hidden glass-panel rounded-2xl border-t-4 ${getBorderColor()} p-6 flex flex-col`}
           style={{ transform: 'rotateY(180deg)' }}
         >
           <h3 className="font-bold text-lg mb-4 border-b border-white/10 pb-2">AI Analysis</h3>
