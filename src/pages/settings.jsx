@@ -11,7 +11,6 @@ import {
   Eye,
   Smartphone,
   CheckCircle2,
-  Globe,
   Sparkles,
   MonitorCog,
   Cpu,
