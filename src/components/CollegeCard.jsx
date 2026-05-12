@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, TrendingUp, Users, Building, AlertCircle, CheckCircle2 } from 'lucide-react';
 
-export default function CollegeCard({ college }) {
+function CollegeCardContent({ college }) {
   const [isFlipped, setIsFlipped] = useState(false);
 
   // Determine border color based on status
@@ -36,6 +36,7 @@ export default function CollegeCard({ college }) {
       onClick={() => setIsFlipped(!isFlipped)}
       role="button"
       tabIndex={0}
+      aria-label={`${collegeName} college details`}
       onKeyDown={(event) => {
         if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault();
@@ -51,7 +52,7 @@ export default function CollegeCard({ college }) {
         {/* Front of Card */}
         <div className={`absolute inset-0 w-full h-full backface-hidden glass-panel rounded-2xl overflow-hidden border-t-4 ${getBorderColor()} flex flex-col`}>
           <div className="h-40 w-full relative">
-            <img src={imageSrc} alt={collegeName} className="w-full h-full object-cover" />
+            <img src={imageSrc} alt={collegeName} className="w-full h-full object-cover" loading="lazy" />
             <div className="absolute inset-0 bg-linear-to-t from-background to-transparent" />
             <div className="absolute bottom-3 left-4 right-4 flex justify-between items-end">
               <span className="px-2 py-1 bg-surface/80 backdrop-blur-sm rounded text-xs font-bold border border-white/10">
@@ -122,3 +123,12 @@ export default function CollegeCard({ college }) {
     </motion.div>
   );
 }
+
+// Memoize to prevent unnecessary re-renders
+const CollegeCard = memo(CollegeCardContent, (prevProps, nextProps) => {
+  return prevProps.college?.id === nextProps.college?.id;
+});
+
+CollegeCard.displayName = 'CollegeCard';
+
+export default CollegeCard;

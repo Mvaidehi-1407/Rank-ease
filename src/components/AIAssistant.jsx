@@ -19,6 +19,7 @@ import {
   XAxis,
   YAxis
 } from 'recharts';
+import { sendChat } from '../services/api.js';
 
 const trendData = [
   { year: '2022', cutoff: 1800 },
@@ -102,40 +103,23 @@ export default function AIAssistant() {
     setIsTyping(true);
 
     try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          message: userMessage
-        })
-      });
+      const result = await sendChat(userMessage);
 
-      let data = {};
-
-      try {
-        data = await response.json();
-      } catch {
-        data = {};
+      if (result.success) {
+        setIsBackendOnline(true);
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: 'assistant',
+            text: result.message || 'Unable to generate response.',
+            source: result.source,
+            graph: shouldShowGraph(userMessage)
+          }
+        ]);
+      } else {
+        throw new Error(result.error);
       }
-
-      const aiReply = data.reply || data.text || data.error || 'Unable to generate response.';
-
-      if (!response.ok) {
-        throw new Error(aiReply);
-      }
-
-      setIsBackendOnline(true);
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: 'assistant',
-          text: aiReply,
-          graph: shouldShowGraph(userMessage)
-        }
-      ]);
-    } catch {
+    } catch (error) {
       setIsBackendOnline(false);
       setMessages((prev) => [
         ...prev,
@@ -165,6 +149,7 @@ Make sure:
         whileTap={{ scale: 0.92 }}
         onClick={() => setIsOpen(true)}
         className="fixed bottom-5 right-5 z-50 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-primary via-secondary to-blue-500 text-white shadow-[0_0_45px_rgba(59,130,246,0.45)] md:bottom-6 md:right-6"
+        aria-label="Open AI Assistant"
       >
         <Sparkles className="h-6 w-6" />
       </motion.button>
@@ -177,6 +162,9 @@ Make sure:
             exit={{ opacity: 0, y: 30, scale: 0.96 }}
             transition={{ duration: 0.25 }}
             className="fixed bottom-24 right-3 z-50 flex h-[80vh] w-[95vw] flex-col overflow-hidden rounded-[32px] border border-white/10 bg-black/30 shadow-[0_0_80px_rgba(0,0,0,0.55)] backdrop-blur-3xl sm:w-[430px] md:right-6 lg:w-[470px]"
+            role="dialog"
+            aria-modal="true"
+            aria-label="AI Assistant Chat"
           >
             <div className="absolute inset-0 overflow-hidden">
               <div className="absolute -right-20 -top-24 h-72 w-72 rounded-full bg-primary/20 blur-3xl" />
@@ -197,6 +185,7 @@ Make sure:
                         className={`h-2 w-2 rounded-full ${
                           isBackendOnline ? 'animate-pulse bg-green-400' : 'bg-yellow-400'
                         }`}
+                        aria-hidden="true"
                       />
                       {isBackendOnline ? 'Online' : 'Backend offline'}
                     </div>
@@ -206,6 +195,7 @@ Make sure:
                 <button
                   onClick={() => setIsOpen(false)}
                   className="flex h-10 w-10 items-center justify-center rounded-xl hover:bg-white/10"
+                  aria-label="Close AI Assistant"
                 >
                   <X className="h-5 w-5 text-white" />
                 </button>
@@ -221,7 +211,7 @@ Make sure:
                   className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   {msg.role === 'assistant' && (
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-secondary">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-secondary" aria-hidden="true">
                       <Bot className="h-5 w-5 text-white" />
                     </div>
                   )}
@@ -275,7 +265,7 @@ Make sure:
                   </div>
 
                   {msg.role === 'user' && (
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-secondary">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-secondary" aria-hidden="true">
                       <User className="h-5 w-5 text-white" />
                     </div>
                   )}
@@ -284,7 +274,7 @@ Make sure:
 
               {isTyping && (
                 <div className="flex gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary" aria-hidden="true">
                     <Loader2 className="h-5 w-5 animate-spin text-white" />
                   </div>
 
@@ -303,12 +293,14 @@ Make sure:
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="Ask about colleges, cutoffs, placements..."
                   className="h-14 w-full rounded-2xl border border-white/10 bg-white/5 pl-5 pr-16 text-white placeholder:text-gray-400 focus:border-primary focus:outline-none"
+                  aria-label="Chat message input"
                 />
 
                 <button
                   type="submit"
                   disabled={!input.trim() || isTyping}
                   className="absolute right-2 top-2 flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-r from-primary to-secondary text-white disabled:cursor-not-allowed disabled:opacity-50"
+                  aria-label="Send message"
                 >
                   {isTyping ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                 </button>

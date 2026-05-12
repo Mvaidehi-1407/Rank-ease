@@ -1,10 +1,11 @@
 import { motion } from 'framer-motion';
-import { SlidersHorizontal, Settings2 } from 'lucide-react';
+import { Settings2 } from 'lucide-react';
+import { CATEGORIES_ARRAY, BRANCHES_ARRAY, REGIONS_ARRAY, GENDERS_ARRAY, FORM_CONSTRAINTS } from '../constants.js';
 
 export default function PredictorControls({ filters, setFilters }) {
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFilters(prev => ({ ...prev, [name]: value }));
+    setFilters(prev => ({ ...prev, [name]: name === 'rank' ? Number(value) : value }));
   };
 
   return (
@@ -22,98 +23,103 @@ export default function PredictorControls({ filters, setFilters }) {
         {/* Rank Slider */}
         <div>
           <div className="flex justify-between items-center mb-2">
-            <label className="text-sm font-medium text-textMuted">EAMCET Rank</label>
+            <label htmlFor="rank" className="text-sm font-medium text-textMuted">EAMCET Rank</label>
             <span className="text-lg font-bold text-white bg-surface px-3 py-1 rounded-md border border-white/5">
               {filters.rank}
             </span>
           </div>
           <input
+            id="rank"
             type="range"
             name="rank"
-            min="100"
-            max="150000"
-            step="100"
+            min={FORM_CONSTRAINTS.RANK_MIN}
+            max={FORM_CONSTRAINTS.RANK_MAX}
+            step={FORM_CONSTRAINTS.RANK_STEP}
             value={filters.rank}
             onChange={handleChange}
             className="w-full h-2 bg-surface rounded-lg appearance-none cursor-pointer accent-primary"
+            aria-label="EAMCET Rank"
+            aria-valuenow={filters.rank}
+            aria-valuemin={FORM_CONSTRAINTS.RANK_MIN}
+            aria-valuemax={FORM_CONSTRAINTS.RANK_MAX}
           />
           <div className="flex justify-between text-xs text-textMuted mt-1">
-            <span>100</span>
-            <span>150k</span>
+            <span>{FORM_CONSTRAINTS.RANK_MIN.toLocaleString()}</span>
+            <span>{FORM_CONSTRAINTS.RANK_MAX.toLocaleString()}</span>
           </div>
         </div>
 
         {/* Category Dropdown */}
         <div>
-          <label className="block text-sm font-medium text-textMuted mb-2">Category</label>
+          <label htmlFor="category" className="block text-sm font-medium text-textMuted mb-2">Category</label>
           <select 
+            id="category"
             name="category" 
             value={filters.category} 
             onChange={handleChange}
             className="w-full bg-surface border border-white/10 rounded-lg p-3 text-white focus:ring-2 focus:ring-primary outline-none transition-all"
+            aria-label="Select category"
           >
-            <option value="OC">OC</option>
-            <option value="BC-A">BC-A</option>
-            <option value="BC-B">BC-B</option>
-            <option value="BC-C">BC-C</option>
-            <option value="BC-D">BC-D</option>
-            <option value="BC-E">BC-E</option>
-            <option value="SC">SC</option>
-            <option value="ST">ST</option>
+            {CATEGORIES_ARRAY.map(cat => (
+              <option key={cat.value} value={cat.value}>{cat.label}</option>
+            ))}
           </select>
         </div>
 
         {/* Branch Dropdown */}
         <div>
-          <label className="block text-sm font-medium text-textMuted mb-2">Branch</label>
+          <label htmlFor="branch" className="block text-sm font-medium text-textMuted mb-2">Branch</label>
           <select 
+            id="branch"
             name="branch" 
             value={filters.branch} 
             onChange={handleChange}
             className="w-full bg-surface border border-white/10 rounded-lg p-3 text-white focus:ring-2 focus:ring-primary outline-none transition-all"
+            aria-label="Select branch"
           >
-            <option value="CSE">CSE</option>
-            <option value="ECE">ECE</option>
-            <option value="IT">IT</option>
-            <option value="EEE">EEE</option>
-            <option value="MECH">MECH</option>
-            <option value="CIVIL">CIVIL</option>
+            {BRANCHES_ARRAY.map(branch => (
+              <option key={branch.value} value={branch.value}>{branch.label}</option>
+            ))}
           </select>
         </div>
 
         {/* Region & Gender Grid */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-textMuted mb-2">Region</label>
+            <label htmlFor="region" className="block text-sm font-medium text-textMuted mb-2">Region</label>
             <select 
+              id="region"
               name="region" 
               value={filters.region} 
               onChange={handleChange}
               className="w-full bg-surface border border-white/10 rounded-lg p-3 text-white focus:ring-2 focus:ring-primary outline-none"
+              aria-label="Select region"
             >
-              <option value="OU">OU</option>
-              <option value="AU">AU</option>
-              <option value="SVU">SVU</option>
-              <option value="Non-Local">Non-Local</option>
+              {REGIONS_ARRAY.map(region => (
+                <option key={region.value} value={region.value}>{region.label}</option>
+              ))}
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-textMuted mb-2">Gender</label>
+            <label htmlFor="gender" className="block text-sm font-medium text-textMuted mb-2">Gender</label>
             <select 
+              id="gender"
               name="gender" 
               value={filters.gender} 
               onChange={handleChange}
               className="w-full bg-surface border border-white/10 rounded-lg p-3 text-white focus:ring-2 focus:ring-primary outline-none"
+              aria-label="Select gender"
             >
-              <option value="Boys">Boys/Co-Ed</option>
-              <option value="Girls">Girls Only</option>
+              {GENDERS_ARRAY.map(gender => (
+                <option key={gender.value} value={gender.value}>{gender.label}</option>
+              ))}
             </select>
           </div>
         </div>
       </div>
       
       <div className="mt-8 p-4 rounded-lg bg-primary/10 border border-primary/20 flex items-start gap-3">
-        <SlidersHorizontal className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+        <Settings2 className="w-5 h-5 text-primary shrink-0 mt-0.5" />
         <p className="text-xs text-textMuted leading-relaxed">
           The simulator provides real-time predictions. Adjusting the rank instantly updates the Visual Intelligence Suite and your College Matches.
         </p>

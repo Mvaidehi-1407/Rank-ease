@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 
 import Navbar from './components/Navbar';
+import ErrorBoundary from './components/ErrorBoundary';
 
 import LandingPage from './pages/LandingPage';
 import PredictorHub from './pages/PredictorHub';
@@ -59,8 +60,10 @@ function Layout() {
 
 export default function App() {
   return (
-    <Router>
-      <Layout />
-    </Router>
+    <ErrorBoundary>
+      <Router>
+        <Layout />
+      </Router>
+    </ErrorBoundary>
   );
 }

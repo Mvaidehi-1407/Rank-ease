@@ -2,40 +2,35 @@ import { useState, useEffect } from 'react';
 import PredictorControls from '../components/PredictorControls';
 import VisualIntelligenceSuite from '../components/VisualIntelligenceSuite';
 import CollegeCard from '../components/CollegeCard';
-import { Loader2 } from 'lucide-react';
+import { Loader2, AlertCircle } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { getPredictions } from '../services/api.js';
+import { DEFAULT_FILTERS, ERROR_MESSAGES } from '../constants.js';
 
 export default function PredictorHub() {
-  const [filters, setFilters] = useState({
-    rank: 5000,
-    category: 'OC',
-    branch: 'CSE',
-    region: 'OU',
-    gender: 'Boys'
-  });
-
+  const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [colleges, setColleges] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchPredictions = async () => {
       setLoading(true);
+      setError(null);
+      
       try {
-        const response = await fetch('/api/predict', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(filters)
-        });
+        const result = await getPredictions(filters);
 
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error || 'Failed to fetch predictions');
+        if (result.success) {
+          setColleges(result.data || []);
+        } else {
+          setError(result.error || ERROR_MESSAGES.SERVER_ERROR);
+          setColleges([]);
         }
-
-        setColleges(data);
-      } catch (error) {
-        console.error("Failed to fetch predictions:", error);
+      } catch (err) {
+        console.error("Failed to fetch predictions:", err);
+        setError(ERROR_MESSAGES.NETWORK_ERROR);
+        setColleges([]);
       } finally {
         setLoading(false);
       }
@@ -80,6 +75,21 @@ export default function PredictorHub() {
                 )}
               </h2>
 
+              {/* Error State */}
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mb-6 p-4 rounded-2xl bg-red-500/10 border border-red-500/30 flex items-start gap-3"
+                >
+                  <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+                  <div>
+                    <h3 className="font-medium text-red-200 mb-1">Unable to Load Predictions</h3>
+                    <p className="text-sm text-red-200/80">{error}</p>
+                  </div>
+                </motion.div>
+              )}
+
               <motion.div
                 layout
                 className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"
@@ -93,9 +103,10 @@ export default function PredictorHub() {
                   ))}
                 </AnimatePresence>
 
-                {!loading && colleges.length === 0 && (
+                {!loading && !error && colleges.length === 0 && (
                   <div className="col-span-full py-12 text-center text-textMuted glass-panel rounded-2xl">
-                    No colleges found matching these exact criteria. Try adjusting your rank or branch.
+                    <p className="mb-2">No colleges found matching these exact criteria.</p>
+                    <p className="text-sm">Try adjusting your rank or branch.</p>
                   </div>
                 )}
               </motion.div>
